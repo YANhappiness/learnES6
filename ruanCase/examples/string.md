@@ -58,7 +58,7 @@
         `${obj.x+obj.y}`
     ```
 
-    字符串模板中调用函数
+##字符串模板中调用函数
 
     ```bash
         function fn(){
@@ -67,6 +67,81 @@
 
         `${fn()}`
     ```
+
+##字符串模板的嵌套
+
+    ```bash
+        const temp = addrs =>`<table>
+            ${addrs.map( addrs =>`
+                <tr><td>${addrs.first}</td></tr>
+                <tr><td>${addrs.second}</td></tr>
+            `
+            ).join(" ")}
+        </table>`
+
+        //调用
+
+        const data = [
+            {first:"yyyy",second:"ssss"},
+            {first:"yyyy",second:"hhhh"}
+        ];
+        console.log(temp());
+    ```
+
+##标签模板
+    ```bash
+    let a = 5;
+    let b = 10;
+    console.log`Hello${a+b} world${a*b}${a}${b}HHH`;
+    或者
+    console.log(['Hello ','world ',''],15,50);
+    ```
+    更复杂的例子
+
+    ```bash
+        let total = 30;
+        let message = count`The  ${total *2} is ${total} *2`;
+
+        function count(params){
+            let result = '';
+            let i = 0;
+            while(i < params.length){
+                result += params[i++];
+                if(i<arguments.length){
+                    result += arguments[i]
+                }
+            }
+            return result;
+        }
+        message;  
+    ```
+    count函数的第一个参数是一个数组，该数组的成员是模板字符串中那些没有变量替换的部分。
+    params 为没有参数替换的部分
+    arguments 部分包括所有参数部分
+
+##标签模板过滤html字符
+    ```bash
+        function SaferHTML(templateData){
+            // templateData   --> 不包括${}中所调用的参数
+            // arguments --> 包含所有的参数
+            let s = templateData[0];
+            for(let i=0;i<arguments.length;i++){
+                let arg = String(arguments[i]);
+                s+=arg.replace(/&/g,"&amp")
+                    .replace(/</g,"&lt")
+                    .replace(/>/g,"&gt")
+
+                s+=templateData[i]
+            }
+            return s;
+        }
+        let render = '<script>alert("123")</script>'
+        let message = SaferHTML`<p>${render} has sent you message</p>`;
+        
+        message;
+    ```
+
+
 
     
 
