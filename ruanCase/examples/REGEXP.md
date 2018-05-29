@@ -73,7 +73,98 @@ es5的Regexp构造函数的参数有两种。
     将r2修改为："/a_+/y" 则会和g一样返回
 ```
 
+使用lastIndex更好的说明y修饰符
 
+```bash
+    const REGEX = /a/g;
+    REGEX.lastIndex = 2; //定义检索的开始位置  
+
+    const match = REGEX.exec("xaya");
+    match.index // 3  匹配成功
+
+    REGEX.lastIndex // 4 下一次检索开始位置 4
+
+    REGEX.exec("xaya"); // unll
+    
+```
+
+    上面的代码中，lastIndex属性每次检索的开始位置，g修饰符从这个位置向后搜索，知道发现匹配位置
+    y修饰符同样遵循该法则，但是必须要求lastIndex指定位置发现匹配
+
+```bash
+    const Regex = /a/y;
+
+    Regex.lastIndex = 2;
+
+    Regex.exec("xaya"); // null 非黏连匹配
+
+    Regex.lastIndex = 3;  // 检索位置从第三个index开始
+
+    const match = Regex.exec("xaya"); 
+
+    match.index = 3;  // 符合匹配规则
+
+    Regex.lastIndex; // 下一次匹配开始位置
+```
+
+    实际y修饰符隐藏了头部匹配^标志
+
+```bash
+    const Regex = /a/gy;
+    'aaaxa'.replace(Regex,"-");   // "---xa"
+
+    //最后一个a不是出现在下一次匹配的头部，不会替换
+```
+    单个的y修饰符对match方法仅能返回第一个匹配，需要与g修饰符连用
+```bash
+    'a1a2a3'.match(/a\d/y);  //['a1']
+    'a1a2a3'.match(/a\d/gy); // ['a1','a2','a3']
+    // 相当于 
+    'a1a2a3'.match(/a\d/g); // ['a1','a2','a3']    
+```
+
+    y修饰符的应用。 是从字符串中提取token（词元），y修饰符确保了匹配之间不会有漏掉的字符
+```bash 
+    const TOKEN_Y = /\s*(\+|[0-9]+)\s*/y;
+    const TOKEN_G = /\s*(\+|[0-9]+)\s*/g;
+
+    tokenize(TOKEN_Y,'3+4'); // ['3','+','4']
+    tokenize(TOKEN_G,'3+4'); // ['3','+','4']
+
+    function tokenize(TOKEN_REGEXP,str){
+        let result = [];
+        let match;
+        while(match = TOKEN_REGEXP.exec(str)){
+            result.push(match[1]);
+        }
+        return result;
+    }
+
+    //当出现非法字符 两者结果就有差异了
+
+    tokenize(TOKEN_Y,'3x+4'); // ['3','+','4']
+    tokenize(TOKEN_G,'3x+4'); // ['3','+','4']
+
+    //g会忽略非法字符，但是y不会
+```
+
+
+## RegExp.prototype.sticky 属性 用于检测是否设置了y修饰符
+```bash
+    var Reg = /hello\d/y
+    r.sticky;  //true
+```
+
+## RegExp.prototype.flags 属性 用于返回正则表达式的修饰符
+```bash
+    //es5 返回正则表达式的正文 source
+    const Reg = /abg/gi
+
+    Reg.source // abc
+
+    //es6 返回正则表达式的修饰符
+    Reg.flags // gi
+```
 
 
 
