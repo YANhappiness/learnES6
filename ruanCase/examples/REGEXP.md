@@ -166,6 +166,130 @@ es5的Regexp构造函数的参数有两种。
     Reg.flags // gi
 ```
 
+## 后行断言
+    javascript语言的正则表达式，仅支持先行断言和先行否定断言。不支持后行断言和后行否定断言
+- 先行断言 ： x只有在y前面才匹配。必须写成/x(?=y)/
+    1. 只匹配百分号前面的数字： /d+(?=%)/
+
+- 先行否定断言： x只有不在y前面才匹配 /x(?!y)/
+    1. 只匹配不在百分号前面的数字 /d+(?!%)/ 
+
+```bash
+    /\d+(?=%)/.exec('100% of US presidents have been male');  //['100']
+    /\d+(?!%)/.exec('that’s all 44 of them'); // ['44']
+
+    // 先行断言()中的部分是不计入返回结果的。
+```
+- 后行断言和先行断言相反。x只有在y后面才匹配，必须写成/(?<=y>)x/
+    匹配美元符号后面的数字要写成 /(?<=$)\d+/
+- 后行否定断言与先行否定断言相反 x只有不在y后面才匹配 写成 /(?<!y)x/
+
+```bash
+    /(?<=\$)\d+/.exec('Benjamin Franklin is on the $100 bill')  // ["100"]
+    /(?<!\$)\d+/.exec('it’s is worth about €90')                // ["90"]
+
+    // ()中部分不计入返回结果
+```
+    后行断言案例
+
+```bash
+    const Re = /(?<=\$)foo/g;
+    '%foo $foo #foo'.replace(Re,'bar')  //"%foo $bar #foo"
+```
+后行断言的实现是需要先匹配/(? <=y)x/ 中的x，然后再回到左边匹配y部分。这种先右后左的执行顺序会导致不符合预期的结果
+
+```bash
+    /(?<=(\d+)(\d+))$/.exec('1053');  //后行断言
+    /^(\d+)(\d+)$/.exec('1053'); // 先
+
+    //上面代码中，需要捕捉两个组匹配。没有“后行断言”时，第一个括号是贪婪模式，第二个括号只能捕获一个字符，所以结果是105和3。而“后行断言”时，由于执行顺序是从右到左，第二个括号是贪婪模式，第一个括号只能捕获一个字符，所以结果是1和053。
+```
+
+## 具名组匹配
+
+正则表达式使用圆括号进行匹配
+```bash
+    const Re = /(\d{4})-(\d{2})-(\d{2})/
+    const matchObj = Re.exec('1999-12-31');
+    matchObj // ["1999-12-31", "1999", "12", "31", index: 0, input: "1999-12-31", groups: undefined]
+    const year = matchObj[1];
+    const month = matchObj[2];
+    const day = matchObj[3];
+```
+
+ES2018 引入了具名组匹配，允许为每个组匹配指定一个名称
+
+```bash
+    const RE = /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/
+    const matchObj  = RE.exec('1990-12-12');
+    const year = match.groups.year;
+    const month = match.groups.month;
+    const day = match.groups.day;
+```
+具名组匹配相当于为每个组匹配加上一个ID，便于描述匹配的目的。不用考虑匹配的顺序问题
+如果没有匹配，那么对应的groups对象的属性回事undefined
+
+
+## 解构赋值和替换
+有了具名组匹配以后可以使用解构赋值直接从匹配结果上为变量赋值
+```
+    let {groups:{one,two}} = /^(?<one>.*):(?<two>.*)$/u.exec('foo:bar')
+    one:foo
+    two:bar
+```
+
+字符串替换时，使用$<组名>引用具名组。
+```bash
+    let re = /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/
+    '2015-01-02'.replace(re,'$<day>/$<month>/$<year>');
+```
+
+## 引用
+    正则表达式内部引用某个"具名组匹配"，可以使用\k<组名>的写法
+
+```bash
+    const Re = /^(?<word>[a-z]+)!\k<word>$/;
+    Re.test('abc!abc');  //true
+    Re.test('abc!cba');  //false 
+
+    // 数字引用 \1 依然有效
+    const Re = /^(?<word>[a-z]+)!\1$/;
+    // 可以组合使用
+    const Re = /^(?<word>[a-z]+)!\k<word>!\1$/;
+    Re.test('abc!abc!abc');  //true
+```
+
+## String.prototype.matchAll()
+    如果一个正则表达式在字符串里面有多个匹配，现在一般使用g或者y就可以提取出来
+
+```bash
+    const Re = /t(e)(st(\d?))/g;
+    const str = 'test1test2test3';
+    const matchs = [];
+    var match;
+    while(match = Re.exec(str)){
+        matchs.push(match);
+    }
+```
+    String.prototype.matchAll方法，可以一次性取出所有匹配。不过，它返回的是一个遍历器（Iterator），而不是数组。
+
+```bash
+    const str = 'test1test2test3';
+    const Re = /t(e)(st(\d?))/g;
+
+    for(const match of str.matchAll(Re)){
+        console.log(match);
+    }
+```
+由于string.matchAll(regex)返回的是遍历器，所以可以用for...of循环取出。相对于返回数组，返回遍历器的好处在于，如果匹配结果是一个很大的数组，那么遍历器比较节省资源。
+
+遍历器转为数组是非常简单的，使用...运算符或者Array.from方法就可以了。
+
+```bash
+    [...str.matchAll(Re)];
+    [Array.from(str.matchAll(Re))]
+```
+
 
 
 
