@@ -298,15 +298,151 @@ foo.name // "foo" es6
 Function 构造函数返回函数实例，name属性的值为anonymous。
 (new Function).name // "anouymous"
 
+## 箭头函数
+    es6允许使用箭头函数（=>）定义函数
+```bash
+    var f = v=>v;
+    var f = function(v){
+        return v;
+    }
+```
+    如果箭头函数不需要参数或需要多个参数，就是用一个圆括号代表参数部分。
+```bash
+    var f = () =>5;
+    # 等同于
+    var f = function(){ return 5;}
+
+    var sum = (sum1,sum2) => sum1+sum2;
+    # 等同于
+    var sum = function(sum1,sum2){return sum1+sum2}
+```
+
+由于大括号被解释成代码块，所以如果箭头函数直接返回一个对象，必须在对象外面加上括号。
+```bash
+    let getItem = id =>{id:id,name:"temp"}; //Err
+    let getItem = id =>({id:id,name:"temp"}); 
+```
+
+箭头函数可以与变量解构结合使用
+```bash
+    const full = ({first,last}) => first+" "+last;
+    function full(person){
+        return person.first +" " +person.last;
+    }
+```
+简化回调函数
+```bash
+    [1,2,3].map(x => x*x);
+
+    var result = values.sort((a,b) => a-b);
+```
+rest参数与箭头函数结合的例子
+```bash
+    const numbers = (...nums) => nums;
+    numbers(1,2,3,4,5);
+
+    const numbers = (foo,...bar) => [foo,bar];
+    numbers(1,2,3,4,5)
+```
+
+## 使用注意点
+this对象指向是可变的，但是在箭头函数中，他是固定的。
+```bash
+    function foo(){
+        setTimeout(()=>{
+            console.log("inner--id:",this.id);
+        },100)
+        console.log("out--id:",this.id);
+    }
+
+    var id = 21;
+
+    foo.call({id:42});
+    # 箭头函数导致this总是指向函数定义生效时所在的对象 42
+```
+箭头函数可以让setTimeout里面的this，绑定定义时所在的作用域，而不是指向运行时所在的作用域
+```bash
+    function Timer(){
+        this.s1 = 0;
+        this.s2 = 0;
+        //箭头函数
+        setInterval(() => this.s1++,1000); //this绑定定义时所在的作用域
+        //普通函数
+        setInterval(function(){
+            this.s2++; //this 指向运行时所在的作用域 ,即全局对象
+            console.log(this.s2);
+        },1000)
+    }
+    var timer = new Timer();
+    setTimeout(()=>console.log('s1:',timer.s1),3100); //s1:3
+    setTimeout(()=>console.log('s2:',timer.s2),3100); //s2:0
+```
+
+箭头函数可以让this指向固定化，这种特性有利于封装回调函数。
+```bash
+    var handler = {
+        id:'123456',
+        init:function(){
+            document.addEventListener('click',event=>this.doSomething(event.type),false);
+        },
+        doSomething:function(type){
+            console.log('Handler'+type+'for'+this.id);
+        }
+    }
+```
+上面代码的init方法中，使用了箭头函数，这导致这个箭头函数里面的this，总是指向handler对象。否则this.doSomething这一行会报错，因为此时this指向document对象
+
+### this指向固定化，实际原因是箭头函数根本没有自己的this，导致内部this就是外层代码块的this。
+
+正是因为它没有this，所以也就不能用作构造函数
+```bash
+    # es6
+    function foo(){
+        setTimeout(()=>{
+            console.log("id",this.id);
+        },1000);
+    }
+    # es5
+    function foo(){
+        var _this = this;
+        setTimeout(function(){
+            console.log("id",_this.id)
+        },100)
+    }
+    foo.call({id:2})
+```
+    箭头函数本身没有自己的this，而是引用外层的this
+```bash
+function foo(){
+    return () => {
+        return => {
+            return => {
+                console.log("id",this.id);
+            }
+        }
+    }
+}
+
+var f = foo.call({id:1});
+
+var t1 = f.call({id:2})()();  //id:1
+var t2 = f().call({id:3})();  //id:1
+var t3 = f()().call({id:4});  //id:1
+```
+上面的代码中，只有一个this，就是函数foo的this，所以t1,t2,t3都输出同样的结果。因为所有的内层函数都是箭头函数，都没有自己的this，他们的this其实都是最外层的foo函数的this
+
+出了this，以下三个变量在箭头函数中也是不存在的，指向最外层的对应变量：arguments，super、new.target
+
+```bash
+    function foo(){
+        setTimeout(()=>{
+            console.log("args:",arguments);
+        },100);
+    }
+
+    foo(2,4,6,8);
+
+    //args : [2,4,6,8]  //最外层foo函数的arguments
+```
 
 
-
-
-
-
-
- 
-
-
-
-    
