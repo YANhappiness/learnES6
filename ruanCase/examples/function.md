@@ -13,8 +13,9 @@
     log("hello",""); //hello world
 ```
 - 上面代码检查函数log函数的参数y有没有赋值，如果没有，则指定默认值为world。
-- 缺点在于如果y赋值了，但是但是对应的布尔值为false，则该赋值不起作用。 "" 
+- 缺点在于如果y赋值了，但是对应的布尔值为false，则该赋值不起作用。 "" 
 - 为了避免这个问题，通常需要判断一下参数y是否被赋值，如果没有等于默认值
+
 ```bash
     function log(x,y){
         if(typeof y === 'undefined'){
@@ -35,7 +36,6 @@ es6允许函数参数默认值，直接写在参数定义的后面。
     log("hello",""); //hello 
 ```
     参数变量是默认声明的，所以不能用let或const再次声明
-
 ```bash
     function foo(x=5,y){
         let x = 1;  //err
@@ -60,7 +60,7 @@ es6允许函数参数默认值，直接写在参数定义的后面。
     function foo({x,y = 5}){   //解构赋值默认值
         console.log(x,y);
     }
-    foo({}) // undefined 5  
+    foo({}) // undefined 5
     foo({x:1}) //1 5
     foo() //TypeError
 ```
@@ -77,7 +77,7 @@ es6允许函数参数默认值，直接写在参数定义的后面。
     function fetch(url,{body='',method='GET',header={}}){
         console.log(method);
     }
-
+    
     fetch('http://abc.com',{}); //"GET"
     fetch('http://abc.com'); //报错
 
@@ -90,7 +90,6 @@ es6允许函数参数默认值，直接写在参数定义的后面。
 ```
 
     练习
-
 ```bash
     function m1({x=0,y=0} = {}){
         return [x,y];
@@ -245,6 +244,14 @@ es6允许函数参数默认值，直接写在参数定义的后面。
         return sum;
     }
     add(2,3,5);
+
+    # 拓展运算符 spread（...）rest参数的逆运算，讲一个数组转为用逗号分隔的参数
+    function add(x,y){
+        return x + y;
+    }
+
+    const numbers = [4,3];
+    add(...numbers) 
 ```
     将rest参数代替arguments变量的例子。
 ```bash
@@ -336,6 +343,7 @@ Function 构造函数返回函数实例，name属性的值为anonymous。
 
     var result = values.sort((a,b) => a-b);
 ```
+
 rest参数与箭头函数结合的例子
 ```bash
     const numbers = (...nums) => nums;

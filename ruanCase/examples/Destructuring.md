@@ -1,24 +1,23 @@
-/*jshint esversion:6*/
+# ES6 允许按照一定模式，从数组或对象中提取值，对变量进行复制，这被称为解构
 
-//ES6 允许按照一定模式，从数组或对象中提取值，对变量进行复制，这被称为解构
+```bash
+    let [a, b, c] = [1, 2, 3];
+    console.log(a);
 
-let [a, b, c] = [1, 2, 3];
-console.log(a);
+    let [foo, [
+        [bar], baz
+    ]] = [1, [
+        [2], 3
+    ]];
+    console.log(bar);
 
-let [foo, [
-    [bar], baz
-]] = [1, [
-    [2], 3
-]];
-console.log(bar);
+    let [head, ...tail] = [0, 1, 2, 3, 4]; //...解构符号
+    console.log(tail); // [1, 2, 3, 4]
 
-let [head, ...tail] = [0, 1, 2, 3, 4]; //...解构符号
-console.log(tail); // [1, 2, 3, 4]
-
-let [x, y] = [1];
-console.log(y); //undefined 解构值不匹配就是undefined
-
-//等号的右边不是数组（不可遍历结构），那么将会报错
+    let [x, y] = [1];
+    console.log(y); //undefined 解构值不匹配就是undefined
+```
+## 等号的右边不是数组（不可遍历结构），那么将会报错
 
 // let [foo] = 1;
 // let [foo] = false;
@@ -27,7 +26,7 @@ console.log(y); //undefined 解构值不匹配就是undefined
 // let [foo] = null;
 // let [foo] = {};
 
-// 对于set 结构也可以使用解构赋值
+## 对于set 结构也可以使用解构赋值
 
 let [a1, b1, c1] = new Set([1, 2, 3]);
 console.log(a1, b1, c1);
@@ -42,7 +41,7 @@ console.log(x1); // 1
 let [x2 = 1] = [null];
 console.log(x2);  // null  null不严格等于 undefined 
 
-// 如果默认值是一个表达式。那么这个表达式是惰性求值的，只有用到的时候才会求值
+## 如果默认值是一个表达式。那么这个表达式是惰性求值的，只有用到的时候才会求值
 
 function F(){
     console.log("aaa");
@@ -51,24 +50,23 @@ let [xx = F()] = [1];
 
 console.log(xx); // 除非被赋值为undefined否则不会调用表达式
 
-// 默认值可以引用解构赋值的其他变量，但是该变量必须已经声明
+## 默认值可以引用解构赋值的其他变量，但是该变量必须已经声明
 
 let [x = 1, y = x] = []; // x=1; y=1
 let [x = 1, y = x] = [2]; // x=2; y=2
 let [x = 1, y = x] = [1, 2]; // x=1; y=2
 let [x = y, y = 1] = []; // ReferenceError: y is not defined
 
-// 对象的解构预赋值
+## 对象的解构预赋值
 let {foo2,bar2} = {bar2:"aaa",foo2:"bbb"};
 // let {foo2:foo2,bar2:bar2} = {bar2: "aaa",foo2: "bbb"};//上面为简写形式
 // 对象的解构与数组有一个重要的不同之处，数组的元素是按次数排列的，变量的取值由它的位置决定。而对象的属性没有次序，变量必须与属性同名才能取到正确的值。
 
-//变量名预属性名不一致情况
+## 变量名预属性名不一致情况
 let {foo3:baz2,bar3} = {bar3:"aaa",foo3:"bbb"};
  //baz2 -->bbb bar3 -->aaa foo3-->is not defined
 
- // 解构嵌套结构的对象
-
+## 解构嵌套结构的对象
  let obj = {
     p:[
         "hello",
@@ -76,10 +74,10 @@ let {foo3:baz2,bar3} = {bar3:"aaa",foo3:"bbb"};
     ]
  };
 
- let {p:[x:,{y}]}; 
- // p为模式，不赋值。x-->hello y-->world
+ let {p:[x,{y}]} = obj; 
+ ## p为模式，不赋值。x-->hello y-->world
 
- let {p,p:[x,{y}]};
+ let {p,p:[x,{y}]} = obj;
  // p{"hello",y:"world"}
 
  const node = {
@@ -107,6 +105,7 @@ let {foo3:baz2,bar3} = {bar3:"aaa",foo3:"bbb"};
      let {x=3} = {x:undefined};  //x=3 
      let {x=3} = {x:null};  //x null
  }
+
 
  //已经声明的变量用于解构赋值
  {
@@ -154,7 +153,6 @@ function add([x,y]){
 add([1,2]); //3
 
 [[1,2],[3,4]].map(([a,b])=>a+b); //[3,7]
-
 
 //函数参数的解构默认值
 {
