@@ -180,4 +180,101 @@ Generator 函数运行之后，返回一个遍历器对象，因此也可以使�
 
     # es6
     var arr2 = Array.from(arrayLike);
+
+    # ['a','b','c']
 ```
+
+常见的类似数组的对象时DOM操作返回的Nodelist集合，以及函数内湖的arguments对象。Array.from都可以讲她转为真正的数组。
+
+```bash
+    let ps = document.querySelectorAll("p");
+    Array.from(ps).filter(p=>{
+        return p.textContext.length > 100;
+    })
+
+    //arguments对象
+
+    function foo(){
+        var args = Array.form(arguments);
+        //...
+    }
+```
+只要部署了Iterator接口数据结构，Array.from都能将其转化为数组
+
+```bash
+    Array.from("hello");
+    // ['h','e','l','l','o']
+
+    let namesSet = new Set(['a','b']);
+    Array.from(namesSet); // ['a','b']
+```
+如果参数是一个真正的数组，Array.from()会返回一个一模一样的数组
+```bash
+    Array.from([1,2,3]);
+    // ['1','2','3']
+```
+ 拓展运算符（...），也可以将某些数据转化为数组
+
+```bash
+    #arguments 对象
+    function foo(){
+        const args = [...arguments];
+    }
+
+    # NodeList对象
+    [...document.querySelectAll('div')]
+```
+任何有length属性的对象，都可以通过Array.from()方法转化为数组，而此时拓展运算符就无法转化
+```bash
+    Array.from({length:3});
+    // [undefined,undefined,undefined]
+```
+对于没有部署该方法的浏览器，可以用Array.prototype.slice()方法代替。
+```bash
+    const toArray = (()=>
+        Array.from?Array.from:obj = >[].slice.call(obj)
+    )();
+```
+Array.from还可以接受第二个参数，作用类似于数组的map方法，用于对每个元素进行处理，将处理后的值放入返回的数组。
+```bash
+    Array.from(array.Like,x => x*x);
+    // 等同于
+    Array.from(array.Like).map(x=>x*x);
+
+    Array.from([1,2,3],(x)=>x*x);
+    //[1,4,9]
+```
+取出一组DOM节点的文本内容
+
+```bash
+    let spans = document.querySelectorAll('span.name')
+    # map()
+    let names1 = Array.prototype.map.call(spans,s => s.textContent);
+    # Array.from()
+    let names2 = Array.from(spans,s => s.textContent)
+```
+将数组中布尔值为false的成员转为0.
+```bash
+Array.from([1,,2,,3],(n)=>n||0)
+//[1,0,2,0,3]
+```
+另一个例子是返回各种数据的类型
+```bash
+    function typeOf(){
+        return Array.from(arguments,value => typeof value)
+    }
+    typeOf(null,[],NaN)
+    // ['object','object',number]
+```
+
+Array.from()
+```bash
+    Array.from({length:2},()=>'jack');
+    # ['jack','jack']
+    
+    function countSymbols(string){
+        return Array.from(string).length;
+    }
+``` 
+
+
