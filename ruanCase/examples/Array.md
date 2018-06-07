@@ -277,4 +277,29 @@ Array.from()
     }
 ``` 
 
+## Array.of() 方法用于将一组数值，直接转化为数组
+```bash
+    Array.of(3,11,8) //[3,11,8]
+    Array.of(3) // [3]
+    Array.of(3).length() // 1
+```
+这个方法主要是弥补数组构造函数Array()的不足。因为参数个数的不同，会导致Array()行为的差异
+```bash
+    Array() //[]
+    Array(3) //[,,]
+    Array(3,11,8) //[3,11,8]
+```
+Array.of基本上可以代替Array()或者new Array(),并且不存在由于参数不同而导致的重载
+```bash
+    Array.of() //[]
+    Array.of(undefined) //[undefined]
+    Array.of(1) //[1]
+    Array.of() //[1,2]
+```
+Array.of() 总是返回参数值组成的数组，如果没有参数就返回一个新数组
+
+Array.of方法可以用下面的代码模拟
+function ArrayOf(){
+    return [].slice.call(srguments);
+}
 
