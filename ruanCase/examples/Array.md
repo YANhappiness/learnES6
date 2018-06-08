@@ -391,3 +391,124 @@ fill方法还可以接受第二个和第三个参数，用于指定填充的起�
     arr
     # [[5],[5],[5]] 
 ```
+## 数组实例的entries(),keys(),values()
+es6提供三个新方法，--entries(),keys(),values()-- 用于遍历数组。他们都返回一个遍历器对象，可以用for...of循环进行遍历，唯一的区别就是keys()是对键名的遍历。values()是对键值的遍历，entries()是对键值对的遍历
+```bash
+    for(let index of ['a','b'].keys()){
+        console.log(index);  //0,1
+    }
+
+    for(let elem of ['a','b'].values()){
+        console.log(elem);  // a,b
+    }
+
+    for(let [index,elem] of ['a','b'].entries()){
+        console.log(index,elem);
+        //0 'a'
+        //1 'b'
+    }
+```
+如果不使用for...of循环，可以手动调用遍历器对象的next方法，进行遍历
+```bash
+    let letter = ['a','b','c'];
+    let entries = letter.entries();
+    console.log(entries.next().value); // [0,'a']
+    console.log(entries.next().value); // [1,'b']
+    conosle.log(entries.next().value); // [2,'c']
+```
+
+## 数组实例的includes()
+Array.prototype.includes方法返回一个布尔值，表示某个数组是否包含给定的值，与字符串的includes方法类似。es6引入改方法
+```bash
+    [1,2,3].includes(2) //true
+    [1,2,3].includes(4) //false
+    [1,2,NaN].includes(NaN) //true
+```
+该方法的第二个参数表示搜索的起始位置，默认是0，如果第二个参数为负数，则表示倒数的位置，如果这时他大于数组长度，则会重置从0开始
+```bash
+    [1,2,3].includes(3,3); //false
+    [1,2,3].includes(3,-1) //true
+    # 相当于
+    [1,2,3].includes(3,2) //true
+```
+在没有
+```bash
+if(arr.indexOf(el) !== -1){
+    ...
+}
+```
+ indexOf缺点
+- 含义不够语义化，找到参数第一个出现的位置，
+- 内部使用严格相等运算符（===）进行判断，这回导致对NaN的误判
+```bash
+    [NaN].indexOf(NaN) // -1
+    [NaN].includes(NaN) //true
+```
+对不符合环境进行判断
+```bash
+    const contains = (()=>
+        Array.prototype.includes
+        ?(arr,value) => arr.includes(value)
+        :(arr,value) => arr.some(el => el === value)
+    )();
+
+    contains(['foo','bar'],'baz')
+```
+Map和Set数据结构有一个has，需要注意与includes区别
+
+- Map结构的has方法，是用来查找键名的，比如Map.prototype.has(key)
+- Set结构的has方法，是用来查找值的，比如Set。prototype.has(value)
+
+## 数组的空位
+数组的空位是指数组的某一位置没有任何值，比如Array构造函数返回的数组都是空位
+Array(3) // [,,]
+值得注意的是，空位不是undefined，一个位置的值等于undefined，依然是有值的。空位是没有任何值
+```bash
+    0 in [undefined,undefined,undefined] //true
+    0 in [,,] //false
+```
+上面代码说明，第一个数组的0号位置是有值的，第二个数组的0号位是没有值的。
+
+- ES5对空位的处理，已经很不一致了，大多数情况都会忽略这个空位
+
+- forEach(),filter(),reduce(),every()和some()都会跳过空位。
+- Map会跳过空位，但会保留这个值。
+- join和toString()将空位置视为undefined，而undefined和null会被处理成空字符串
+```bash
+    [,'a'].forEach((x,i,a) => console.log(i))  // 1
+    ['a',,'b'].filter(x=> true); //["a", "b"]
+    [,'a'].every(x=> x==='a'); //true  用于检测数组所有参数是否都符合规则
+    [1,,2].reduce((x,y) => x+y) //3 接受一个函数作为累加器，从左到右开始计算，结果为一个值
+    [,'a'].some(x => x!==a) //false 用于检测数组中是否有元素满足指定条件
+    [,'a'].map(x=>1) //[,1] 返回一个数组，数组元素为函数处理过后的值
+
+    [,'a',undefined,null].join("#") // "#a##"  undefined --> 
+    [,'a',undefined,null].toString() // ",a,," undefined -->
+```
+ES6 则是明确将空位转为undefined
+Array.from()方法会将数组的空位转为undefined，也就是说这个方法不会忽略空位
+Array.from(['a',,'b'])
+//["a",undefined,"b"]
+拓展运算符也会将空位转化为undefined
+[...['a',,'b']] // ['a',undefined,'b']
+copyWithin会连为也会一起复制
+[,'a','b',,].copyWithin(2,0) // [,'a',,'a']
+
+for...of循环也会遍历空位
+let arr = [,,];
+for(let i of arr){
+    console.log(1)
+}
+//1
+//1
+
+for...of并没有忽略他们，如果改成map方法会跳过空位
+entries(),keys(),values(),find(),findIndex()会将空位处理成undefined
+```bash
+    [...[,'a'].entries()] //[[0,undefined],[1,"a"]] 
+    [...[,'a'].keys()] // [0,1]
+    [...[,'a'].values()] // [undefined,"a"]
+    [,'a'].find(x => true) // undefined
+    [,'a'].findIndex(x => true) // 0
+```
+由于空位的处理规则非常不统一，所以建议避免出现空位。
