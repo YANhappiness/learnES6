@@ -176,7 +176,77 @@ bind方法创造的对象，name属性返回bound加上原函数的名字；Func
     obj[key1].name //"" 无描述
 ```
 
+## object.is()
+es5 前者自动转化数据类型，后者NaN不等于自身。
+用来比较两个值是否严格相等，与严格比较运算符（===）的行为基本一致
+```bash
+Object.is('foo','foo');  //true
+Object.is({},{});   //false
 
+#不同之处 +0 != -0 ,NaN等于本身
++0 === -0 // true
+NaN === NaN // false 
 
+Object.is(+0,-0);  // false
+Object.is(NaN,NaN); // true
+```
 
+Object.definePrototype(Object,"is",{
+    value:function(x,y){
+        if(x === y){
+            //针对+0 不等于 -0的情况
+            x !== 0 || 1/x === 1/y
+        }
+        return  x !== x && y !== y;
+    },
+    configurable:true,
+    enumerable:false,
+    writeable:true,
+});
 
+## Object.assign 方法
+用于对象的合并，将源对象（source）的所有的可枚举属性，复制到目标对象上（target）
+```bash
+    const target = {a:1};
+    const source1 = {b:2};
+    const source2 = {c:3};
+    Object.assign(target,source1,source2);
+    target // {a:1,b:2,c:3}
+```
+Object.assign方法的第一个参数是目标对象，后面的参数都是源对象。
+注意，如果目标对象与源对象是同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性
+如果存在同名属性，则后面的属性会覆盖前面的属性。
+```bash
+    const target = {a:1,b:2};
+    const source1 = {b:3,c:4}
+    const source2 = {c:3,a:4}
+    Object.assign(target,source1,source2)
+    target// {a: 4, b: 3, c: 3}
+```
+如果只有一个参数会直接返回该参数
+```bash
+    const obj = {a:0}
+    Object.assign(obj) === obj //true
+```
+如果该参数不是对象，回先转化为对象再返回。
+typeof Object.assign(2) // "Object"
+
+由于undefined和null无法转化为对象，所以如果把它们当成参数，就会报错。
+```bash
+    Object.assign(undefined); //报错
+    Object.assign(null); //报错
+```
+
+如果非参数出现在源对象的位置（即非首参数），那么处理规则有所不同，首先这些参数会转化成对象，无法转化成对象，就会跳过，undefined和null不在首参数，就不会报错。
+```bash
+    let obj = {a:1}
+    Object.assign(obj,undefined) == obj// true 非对象被忽略
+```
+其他类型的值（数值，字符串，布尔值）不在首参数，也不会报错。但是，除了字符串会以数组的形式，拷贝到目标对象，其他值都不会产生效果。
+```bash
+    const v1 = 'abc';
+    const v2 = true; // 忽略
+    const v3 = 10; // 忽略
+    const obj = Object.assign({},v1,v2,v3);
+    console.log(obj); //{"0":"a","1":"b","2":"c"}
+```
