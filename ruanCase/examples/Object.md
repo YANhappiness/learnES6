@@ -3,6 +3,7 @@
 ## 1.属性的简洁表示法
 
 ES6允许直接写入变量和函数，作为对象的属性和方法。这样书写更加简洁
+
 ```bash
     const foo = 'foo';
     const baz = {foo};
@@ -11,7 +12,9 @@ ES6允许直接写入变量和函数，作为对象的属性和方法。这样�
     # 等同于
     const foo = {foo:'foo'}
 ```
+
 上面的代码中，ES6允许在对象中，直接写变量。这事，属性名为变量名，属性值为变量的值。下面是另一个例子。
+
 ```bash
     function f(x,y){
         return {x,y};
@@ -116,7 +119,9 @@ example
     lastWord = 'last word'
     # 驼峰写法可以解析成非驼峰字符串，反之报错
 ```
+
 表达式用于定义方法名
+
 ```bash
     let obj = {
         ['h'+'ello'](){
@@ -126,7 +131,9 @@ example
 
     obj.hello() //hi
 ```
+
 属性名表达式如果是一个对象，默认情况下会自动将对象转化为字符串[object object]
+
 ```bash
     const keyA = {a:1};
     const ketB = {b:2};
@@ -136,8 +143,11 @@ example
     }
     myObject // object{[object Object]: "valueB"}
 ```
+
 ## 方法的name属性
+
 属性的name属性，返回函数名。对象方法也是函数，因此也有name属性
+
 ```bash
     const person = {
         sayName(){
@@ -146,8 +156,10 @@ example
     };
     person.sayName.name //"sayName"
 ```
+
 name 返回函数名即方法名
 如果对象的方法使用了取值函数（getter）和存值函数（setter），则name属性不是在改方法上面，而是该方法的属性描述对象的get和set属性上面，返回值是方法名前加上get和set
+
 ```bash
     const obj = {
         get foo(){},
@@ -158,13 +170,17 @@ name 返回函数名即方法名
     const descriptor = Object.getOwnPropertyDescriptor(obj,'foo')
     descriptor.set.name // 'set foo'
 ```
+
 bind方法创造的对象，name属性返回bound加上原函数的名字；Function构造函数创造的函数，name属性返回anonymous
+
 ```bash
     (new Function()).name(); "anonyomous"
     var doSomething = function(){}
     doSomething.bind.name //"bound doSomething"
 ```
+
 如果对象的方法是一个symbol值，那么name属性返回的是这个symbol值的描述
+
 ```bash
     const key1 = Symbol('description');
     const key2 = Symbol();
@@ -177,8 +193,10 @@ bind方法创造的对象，name属性返回bound加上原函数的名字；Func
 ```
 
 ## object.is()
+
 es5 前者自动转化数据类型，后者NaN不等于自身。
 用来比较两个值是否严格相等，与严格比较运算符（===）的行为基本一致
+
 ```bash
 Object.is('foo','foo');  //true
 Object.is({},{});   //false
@@ -216,6 +234,7 @@ Object.definePrototype(Object,"is",{
 Object.assign方法的第一个参数是目标对象，后面的参数都是源对象。
 注意，如果目标对象与源对象是同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性
 如果存在同名属性，则后面的属性会覆盖前面的属性。
+
 ```bash
     const target = {a:1,b:2};
     const source1 = {b:3,c:4}
@@ -223,26 +242,33 @@ Object.assign方法的第一个参数是目标对象，后面的参数都是源�
     Object.assign(target,source1,source2)
     target// {a: 4, b: 3, c: 3}
 ```
+
 如果只有一个参数会直接返回该参数
+
 ```bash
     const obj = {a:0}
     Object.assign(obj) === obj //true
 ```
+
 如果该参数不是对象，回先转化为对象再返回。
 typeof Object.assign(2) // "Object"
 
 由于undefined和null无法转化为对象，所以如果把它们当成参数，就会报错。
+
 ```bash
     Object.assign(undefined); //报错
     Object.assign(null); //报错
 ```
 
 如果非参数出现在源对象的位置（即非首参数），那么处理规则有所不同，首先这些参数会转化成对象，无法转化成对象，就会跳过，undefined和null不在首参数，就不会报错。
+
 ```bash
     let obj = {a:1}
     Object.assign(obj,undefined) == obj// true 非对象被忽略
 ```
+
 其他类型的值（数值，字符串，布尔值）不在首参数，也不会报错。但是，除了字符串会以数组的形式，拷贝到目标对象，其他值都不会产生效果。
+
 ```bash
     const v1 = 'abc';
     const v2 = true; // 忽略
@@ -250,3 +276,93 @@ typeof Object.assign(2) // "Object"
     const obj = Object.assign({},v1,v2,v3);
     console.log(obj); //{"0":"a","1":"b","2":"c"}
 ```
+
+注意点
+
+- 浅拷贝 Object.assign方法实行的是浅拷贝，如果源对象某个属性的值是对象的引用，那么目标对象得到的就是这个对象的引用。
+
+```bash
+    const obj1  = {a:{b:1}};
+    const obj2 = {Object.assgin{},obj1}
+    obj1.a.b = 2   //改变引用的值
+    obj2.a.b //2
+```
+
+源对象obj1的a属性是一个对象，Object.assign的值是这个对象引用，对这个值的任何变化都会体现到目标对象上。
+
+- 同名属性的替换
+
+对于这种嵌套的对象，一旦遇到同名属性，Object.assign的处理方法是替换，而不是添加。
+
+```bash
+    const target = {a:{b:"c",d:"e"}};
+    const source {a:{b:"hello"}};
+    Object.assign(target,spurce);
+
+    # {a:{b:"hello"}}
+```
+
+target对象的a属性被source对象的a属性整个替换了.
+
+- 数组的处理
+
+Object.assign可以用来处理数组，但是会把数组视为对象。
+
+Object.assign([1,2,3],[4,5]);
+//[4,5,3]
+
+上面代码中，Object.assign把数组视为属性名为0，1，2的对象，因此，源数组的0号属性4替换了对象数组中的1
+
+- 取值函数的处理
+
+Object.assign只能进行值的复制，如果复制的值是一个取值函数，那么将计算后复制。
+
+```bash
+    const source = {
+        get foo(){return 1};
+    }
+
+    const target = {};
+    Object.assign(target,source);
+    # {foo:1}
+```
+
+Object.assign 不会复制取值函数，而是计算后复制该值。
+
+## 常见的Object.assign()用途
+
+- 为对象添加属性
+
+```bash
+    class Ponit {
+        constructor(x,y){
+            Object.assign(this,{x,y});
+        }
+    }
+```
+
+object.assign将x,y属性添加到Point类的对象实例
+
+- 为对象添加方法
+
+```bash
+    Object.assign(SomeClass.prototype,{
+        someMethod(arg1,arg2){
+
+        },
+        antherMethod(){
+
+        }
+    })
+
+    # 相当于
+
+    someClass.prototype.someMethod = function(arg1,arg2){
+
+    }
+
+    someClass.prototype.antherMethod  = function(){
+
+    }
+```
+使用了对象的属性的简洁表示法，直接将两个函数放到大括号中，在使用assign方法添加到someClass.prototype上
