@@ -366,3 +366,80 @@ object.assign将x,y属性添加到Point类的对象实例
     }
 ```
 使用了对象的属性的简洁表示法，直接将两个函数放到大括号中，在使用assign方法添加到someClass.prototype上
+
+- 克隆方法
+
+```bash
+    function clone(origin){
+        return Object.assign({},origin);
+    }
+```
+
+上面的代码将原始对象拷贝到一个空对象，就得到了原始对象的拷贝。
+
+这种方法只能克隆原始对象本身，不能克隆他继承的值。如果想要保持集成链，可以采用下面的代码。
+
+```bash
+    function clone(origin){
+        let originProto = Object.getPrototype(origin)
+        return Object.assgin(Object.create(originProto),origin)
+    }
+```
+
+- 合并对象
+
+将多个对象合并到某个对象。
+
+```bash
+    const merge = (target,...sources) => Object.assgin(target,...sources);
+
+    # 合并后返回一个新对象
+
+    const merge = (...sources) => Object.assgin({},...sources);
+```
+
+- 为属性指定默认值
+
+```bash
+    function DEFAULTS = {
+        logLevel = 0;
+        outputFormat = 'html';
+    }
+
+    function processContent(options){
+        options = Object.assgin({},DEFAULTS,options);
+        console.log(options);
+    }
+```
+
+DEFAULTS对象是默认值，options对象是用户提供的参数。Object.assgin()方法将DEFAULTS和options合并成一个新对象，如果两者有同样的属性，则options的属性会覆盖DEFAULTS属性的值
+
+由于存在浅拷贝的问题，DEFAULTS对象和options对象最好都是简单类型。不要指向另一个对象，否则DEFAULTS对象的属性很可能不起作用。
+
+```bash
+    const DEFAULTS = {
+        url:{
+            host:'example.com',
+            port:'8080'
+        },
+    }
+
+    processContent({url:{port:8000}}
+
+    {
+        url:{port:8000}
+    }
+```
+
+上面的代码愿意是将url.port改成8000，url.host不变。实际结果却是options.url覆盖掉了DEFAULTS.url，所以url.host就不存在了
+
+- 属性的可枚举性和遍历
+
+对象的每隔属性都有一个描述对象用来控制该属性的行为。Object.getOwnPropertyDescriptor方法获取该属性的描述对象。
+
+```bash
+    let obj = {foo: 123};
+    Object.getOwnPropertyDescriptor(obj,'foo')
+
+    ####{value: 123, writable: true, enumerable: true, configurable: true}
+```
