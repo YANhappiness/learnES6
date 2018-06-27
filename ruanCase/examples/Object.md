@@ -443,3 +443,142 @@ DEFAULTS对象是默认值，options对象是用户提供的参数。Object.assg
 
     ####{value: 123, writable: true, enumerable: true, configurable: true}
 ```
+
+## 属性的遍历
+
+ES6有5种方法可以遍历对象的属性
+
+1. for ... in 循环遍历对象自身和继承的可枚举属性（不含Symbol）
+
+2. Object.keys(obj)
+    Object.keys返回一个数组，包括对象自身的（不含继承的）所有可枚举属性（不含Symbol属性）的键名。
+
+3. Object.getOwnPropertyNames(obj)
+    Object.getOwnPropertyNames返回一个数组，包含对象自身的所有属性（不含Symbol）属性，但是包含不可枚举属性）的键名
+
+4. Object.getOwnPropertySymbols(obj) 返回一个数组，包含对象自身的所有Symbol属性的键名
+
+5. ReflectownKeys(obj) 返回一个数组，包括对象自身的所有的键名，不管键名是Symbol或字符串，也不管是否可枚举
+
+以上的5中方法遍历对象的键名，都遵循同样的属性遍历的次序规则。
+
+- 首先遍历所有数值键，按照数值升序排序
+- 其次遍历所有字符串键，按照加入时间升序排序
+- 最后遍历所有Symbol键，按照加入时间升序排列
+
+Reflect.ownKeys({[Symbol()]:0,b:0,10:0,2:0,a:0})
+// ['2','10','b','a',Symbol()]
+
+## Object.setPrototypeOf()
+    Object.setPrototypeOf方法的作用与__peoto__相同，用来设置一个对象的prototype对象，返回参数对象本身。他是ES6正式推荐的设置原型对象的方法。
+
+// 格式
+    Object.setPrototypeOf(object,prototype);
+
+// 用法
+    Object.setPrototypeOf({},null);
+
+该方法等同于下面的函数
+
+```bash
+    function (obj,proto){
+        obj.__proto__ = proto;
+        return obj;
+    }
+
+    # example
+
+    let proto = {};
+    let obj = {x:10};
+    Object.setPrototypeOf(obj,proto);
+    proto.y = 20;
+    proto.z = 30;
+
+    obj.x // 10;
+    obj.y // 20;
+    obj.z // 30;
+    
+    obj  //{x:10}
+```
+
+如果第一个参数不是对象，会自动转化为对象。但是由于返回的还是第一个参数，所以这个操作不会产生任何效果。
+
+```bash
+        Object.setPrototypeOf(1,{}) === 1 //true
+        Object.setPrototypeOf('foo',{}) === 'foo' //true
+        Object.setPrototypeOf(true,{}) === true //true
+        # 由于undefined和unll 无法转化为对象，所以如果第一个参数是undefined或null，就会报错
+
+        Object.setPrototypeOf(undefined,{})  // TypeError 
+        Object.setPrototypeOf(null,{})  // TypeError 
+```
+
+## Object.getPrototypeOf()
+
+该方法与Object.setPrototypeOf()方法配套，用于读取一个对象的原型。
+Object.getPrototypeOf(obj);
+
+```bash
+    function Rectangle(){
+        // ...
+    }
+
+    const rec = new Rectangle();
+
+    Object.getprototypeOf(rec) === Rangle.prototype
+    // true
+
+    Object.setPrototypeOf(rec,Object.protytype)
+    Object.getprototypeOf(rec) === Object.prototype
+    // true
+
+
+    如果参数不是对象，会自动转化为对象
+
+    Object.getPrototype(1) === Number.prototype // true
+    Object.getPrototype('foo') === String.prototype // true
+    Object.getPrototype(true) === Boolean.prototype // true
+    如果参数是undefined或null，他们无法转化为对象，所以会报错
+    Object.getPrototypeOf(null) //TypeError
+    Object.getPrototype(undefined) //TypeError
+```
+
+## super 关键字
+我们知道，this关键字总是指向函数所在的当前对象，ES6又新增；了另一个类似的关键字super，指向当前对象的原型对象。
+
+```bash
+    const proto = {
+        foo : 'hello'
+    };
+
+    const obj = {
+        foo : 'world',
+        find(){
+            return super.foo;
+        }
+    };
+
+    Object.setPrototypeOf(obj,proto);
+    obj.find() // 'hello'
+```
+上面代码中，对象obj的find方法中，通过super.foo引用了原型对象proro的foo属性
+
+super关键字表示原型对象时，只能用在对象的方法中，用在其他地方都会报错。
+
+```bash
+    const obj = {
+        foo : super.foo   //super用在属性里面，
+    }
+
+    const obj = {
+        foo : () => super.foo  // super用在函数里面，然后复制给foo属性，目前只有对象方法的简写法可以让Javascript引擎确认，定义的是对象的方法。
+    }
+
+    const obj = {
+        foo : function(){
+            return super.foo
+        }
+    }
+```
+
+上面三种super的用法都会报错，因为对javascript引擎来说，这里的super都没有用在对象的方法里。
