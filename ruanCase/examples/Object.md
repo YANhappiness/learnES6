@@ -470,7 +470,7 @@ Reflect.ownKeys({[Symbol()]:0,b:0,10:0,2:0,a:0})
 // ['2','10','b','a',Symbol()]
 
 ## Object.setPrototypeOf()
-    Object.setPrototypeOf方法的作用与__peoto__相同，用来设置一个对象的prototype对象，返回参数对象本身。他是ES6正式推荐的设置原型对象的方法。
+    Object.setPrototypeOf方法的作用与__proto__相同，用来设置一个对象的prototype对象，返回参数对象本身。他是ES6正式推荐的设置原型对象的方法。
 
 // 格式
     Object.setPrototypeOf(object,prototype);
@@ -499,6 +499,7 @@ Reflect.ownKeys({[Symbol()]:0,b:0,10:0,2:0,a:0})
     obj.z // 30;
     
     obj  //{x:10}
+    ## obj 要设置原型的对象， proto该对象的新原型
 ```
 
 如果第一个参数不是对象，会自动转化为对象。但是由于返回的还是第一个参数，所以这个操作不会产生任何效果。
@@ -544,7 +545,7 @@ Object.getPrototypeOf(obj);
 ```
 
 ## super 关键字
-我们知道，this关键字总是指向函数所在的当前对象，ES6又新增；了另一个类似的关键字super，指向当前对象的原型对象。
+我们知道，this关键字总是指向函数所在的当前对象，ES6又新增了另一个类似的关键字super，指向当前对象的原型对象。
 
 ```bash
     const proto = {
@@ -560,6 +561,12 @@ Object.getPrototypeOf(obj);
 
     Object.setPrototypeOf(obj,proto);
     obj.find() // 'hello'
+
+    const proto = {foo:"hello"}
+    const obj = {foo:"world"}
+    Object.setPrototypeOf(obj,proto);
+    console.log(proto.foo,obj.foo)
+
 ```
 上面代码中，对象obj的find方法中，通过super.foo引用了原型对象proro的foo属性
 
@@ -582,3 +589,54 @@ super关键字表示原型对象时，只能用在对象的方法中，用在其
 ```
 
 上面三种super的用法都会报错，因为对javascript引擎来说，这里的super都没有用在对象的方法里。
+
+
+## Javascript引擎内部，super.foo等同于Object.getPrototypeOf(this).foo属性或者Object.getPrototypeOf(this).foo.call(this)
+
+```bash
+    const proto = {
+        x: "hello",
+        foo(){
+            console.log(this.x);
+        }
+    }
+
+    const obj = {
+        x:"world",
+        foo(){
+            super.foo()
+        }
+    }
+
+    Object.setPrototypeOf(obj,proto)
+    obj.foo() // world 
+    # 上面代码中，super.foo指向原型对象proto的foo方法，但是绑定的this却还是当前的对象obj，因此输出的就是world
+```
+
+## Object.keys() 、 Object.values 、 Object.entries()
+
+### Object.keys() 返回一个数组，成员是参数本身（不含继承）所有遍历属性键名
+
+```bash
+    var obj = {foo:"bar",baz:42}    
+    Object.keys(obj); //["foo", "baz"]
+```
+
+### Objevt.values 
+
+```bash
+    let {keys,values,entries} = Object;
+    let obj = {a:1,b:2,c:3}
+
+    for(let key of keys(obj)){
+        console.log(key); // 'a','b','c'
+    }
+
+    for(let value of values(obj)){
+        console.log(value) // 1,2,3
+    }
+
+    for(let [key,value] of entries(obj)){
+        console.log([key,value]); // ['a':1],['b':2],['c':3]
+    }
+```
