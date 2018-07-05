@@ -636,7 +636,60 @@ super关键字表示原型对象时，只能用在对象的方法中，用在其
         console.log(value) // 1,2,3
     }
 
+    
     for(let [key,value] of entries(obj)){
         console.log([key,value]); // ['a':1],['b':2],['c':3]
     }
 ```
+## 对象的拓展运算符
+```bash
+    const [a,...b] = [1,2,3];
+    a //1
+    b // [2,3]
+```
+
+## 解构赋值
+ 对象的解构赋值用于从一个对象取值，相当于将目标对象自身的所有可遍历的，但尚未被读取的属性，分配到指定的对象上面。所有的键和他的值都会被拷贝到新的对象上面。
+
+ ```bash
+    let {x,y,...z} = {x:1,y:2,a:3,b:4}
+    x // 1
+    y // 2
+    z // {a:3,b:4}
+
+    let {x,y,...z} = null/undefined  // err 
+    # 解构赋值被要求右边是一个对象，如果是undefined或null，就会报错
+
+    let{...x,y,z} = obj;
+    # 解构赋值必须是最后一个
+
+
+    let obj = {a:{b:1}}
+
+    let {...x} = obj;
+    obj.a.b = 2;
+    x.a.b //2 
+    # 解构赋值是浅拷贝，若一个键的值是一个符合类型的值（数组、对象、函数）那么解构赋值拷贝的是这个值的引用，而不是这个值的副本
+
+    // 另外 拓展运算符的解构赋值不能赋值继承自原型的对象属性
+    let o1 = {a:1}
+    let o2 = {b:2}
+    o2.__proto__ = o1;
+    let {...o3} = o2;
+    o3  // {b:2}  不能继承 o2.a
+    o3.a // undefined
+
+    # 另一个例子
+    const o = Object.create({x:1,y:2})
+    o.z = 3;
+    let {x,...newObj} = o;
+    let {y,z} = newObj;
+    x //1
+    y //undefined
+    z // 3
+
+    # x 单纯的结构赋值， y,z为拓展运算符结构赋值，所有只能读取对象o自身的，所以变量z可以赋值成功，变量y取不到值。
+
+    //Object.create 创造一个新对象，使用现有的对象来提供新创建对象的__proto__
+ ```
+
