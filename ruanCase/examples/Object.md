@@ -693,3 +693,55 @@ super关键字表示原型对象时，只能用在对象的方法中，用在其
     //Object.create 创造一个新对象，使用现有的对象来提供新创建对象的__proto__
  ```
 
+ ## 拓展运算符
+ 对象的拓展运算符（...）用于取出参数对象的所有可遍历属性，拷贝到当前对象之后
+
+ ```bash
+    let z = {a:3,b:4};
+    let n = {...z};
+    n // {a:3,b:4}
+
+    等同使用了Object.assign方法
+    let aClone = {...a}
+    # 等同于
+    let aClone = Object.assign({},a);
+ ```
+
+ 上面只是拷贝了对象实例的属性，如果想完整克隆一个对象，还拷贝对象原型的属性，可以采用下面的写法
+
+ ```bash
+    const clone1 = {
+        __proto__ : Object.getPrototypeOf(obj),
+        ...obj
+    }
+
+    const clone2 = Object.assign(
+        Object.create(Object.getPrototypeOf(obj));
+        obj
+    )
+
+    const clone3 = Object.create(
+        Object.getPrototypeOf(obj),
+        Object.getOwnPrototypetyDescriptors(obj)
+    )
+ ```
+
+ 拓展运算符可以合并两个对象
+ ```bash
+    let ab = {}
+    # 等同于
+    let ab = Object.assign({},a,b)
+ ```
+ 用户自定义属性，放在拓展运算符后面，则拓展运算符内部的同名属性会被覆盖掉
+
+ ```bash
+    let aWithOverrides = {...a,x:1,y:2}
+    # 等同于
+    let aWithOverrides = {...a,...{x:1,y:2}};
+    # 等同于
+    let x=1,y=2,aWithOverrides = {...a,x,y}
+    # 等同于
+    let aWithOverrides = Object.assign({},a,{x:1,y:2})
+ ```
+
+
