@@ -84,3 +84,81 @@ symbol值是不能与其他值一起运算的。
     Sym + 2 // TypeError
 
 ```
+
+## 作为属性名的Symbol
+
+由于每个Symbol值都是不相等的，这意味着Symbol值作为标识符，用于对象的属性名，就能保证不会出现同名属性，这对于一个对象由多个模块构成的情况非常有用，能防止某一个键被不小心改写或覆盖。
+
+```bash
+    let mySym = Symbol();
+    # 第一种写法
+    let a = {};
+    a[mySym] = 'Hello';
+
+    # 2
+    let a = {
+        [mySym] : 'Hello';
+    }
+
+    # 3
+    let a = {};
+    Object.defineProperty(a,mySym,{value : 'Hello'});
+
+    a[mySym]   //'Hello'
+```
+
+Symbol值作为对象属性名时，不能用点运算符
+
+```bash
+    const mySym = Symbol();
+    const a = {};
+
+    a.mySym = 'Hello';  
+    a[mySym] // undefined  mySym为字符串
+    a['mySym'] // 'Hello' 
+```
+
+因为点运算符后面总是字符串，所以不会读取mySym作为标识符所指代的那个值，导致a的属性名实际是一个字符串，而不是一个Symbol值。
+
+在对象内部，使用Symbol值定义属性时，Symbol值必须放在方括号内，
+
+```bash
+    let s = Symbol();
+    let Obj = {
+        [s] : function(arg){
+            console.log(arg);
+        }
+    }
+    Obj[s](123);  //123
+```
+
+Symbol类型还可以定义一组常量，保证这组常量的值都是不相等的。
+
+```bash
+    const log = {};
+    log.levels = {
+        Debug : Symbol('debug'),
+        Info : Symbol('info'),
+        Wran : Symbol('wran')
+    }
+
+    console.log(log.levels.Debug);
+
+    # other
+
+    const COLOR_RED = Symbol();
+    const COLOR_GREEN = Symbol();
+
+    function getComplement(color){
+        switch(color){
+            case COLOR_RED :
+                return COLOR_RED;
+            case COLOR_GREEN :
+                return COLOR_GREEN
+            default :
+            throw new Error('Undefined color');
+        }
+    }
+```
+
+任何值都不会有相同的值，因此可以保证上面的switch语句会按照设计的方式工作
