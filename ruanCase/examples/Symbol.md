@@ -162,3 +162,121 @@ Symbol类型还可以定义一组常量，保证这组常量的值都是不相�
 ```
 
 任何值都不会有相同的值，因此可以保证上面的switch语句会按照设计的方式工作
+
+## 实例：消除魔术字符串
+魔术字符串指的是，再带中多次出现、与代码形成强耦合的某一个具体的字符串或者数值。风格良好的代码，应该尽量消除魔术字符串，改由含义清晰的变量替换。
+
+```bash
+    function getArea(shape,option){
+        let area = 0;
+        switch(shape){
+            case 'Triangle':
+            area:0.5*options.width*options.heigth;
+            break;
+        }
+        return area;
+    }
+
+    getArea('Triangle',{width:100,height:100})
+
+    # 多次出现与代码形成“强耦合”，不利于代码的后期维护
+
+    const shapeType = {
+        triangle : 'Triangle'
+    }
+
+    ....
+        case shapeType.triangle:
+    ....
+    
+    getArea(shapeType.triangle,{....})
+
+    # 将字符串改成一个对象的属性，消除了耦合
+    # 为避免冲突
+
+    const shapeType = {
+        triangle : Symbol();
+    }
+```
+
+## 属性名的遍历
+
+Symbol作为属性名，该属性不会出现在for...in、for...of循环，也不会被Object.keys()、Object.getOwnpropertyNames()、JSON.stringify()返回。但是，它也不是私有属性，有一个Object.getOwnPropertySymbols()方法，可以获取指定对象的所有Symbol属性名。
+
+Object.getOwnpropertySymbols方法返回一个数组，成员是当前对象的所有用作属性名的Symbol值
+
+```bash
+    const obj = {}
+    let a = Symbol('a');
+    let b = Symbol('b');
+
+    obj[a] = 'hello';
+    obj[b] = 'world';
+    const objectSymbols = Object.getOwnPropertySymbols(obj);
+    objectSymbols //[symbol(a),symbol(b)]
+```
+    for...in/Object.getOwnPropertyNames
+
+```bash
+    const obj = {};
+    let foo = Symbol("foo")
+
+    Object.defineProperty(obj,foo,{
+        value:"foobar",
+    });
+
+    for(let i in obj){
+        console.log(i);
+    }
+    Object.getOwnPropertyNames(obj)
+    // []
+    Object.getOwnPropertySymbols(obj)
+    // [Symbol(foo)]
+```
+
+Reflect.ownKeys方法可以返回所有类型的键名，包括常规键名和Symbol键名。
+```bash
+    let obj = {
+        [Symbol('my_key')]:1,
+        enum:2,
+        nonEnum:3
+    }
+
+    Reflect.ownKeys(obj)
+    // ["enum", "nonEnum", Symbol(my_key)]  //只返回键名
+```
+
+由于以Symbol值作为名称的属性，不会被常规方法遍历得到。我们可以利用这个特性，为对象定义一些菲斯有的，但又希望只用于内部的方法
+
+```bash
+    let size = Symbol('size');
+    class Collection{
+        constructor(){
+            this[size] = 0;
+        }
+
+        add(item){
+            this[this[size]] = item;
+            this[size]++
+        }
+
+        static sizeOf(instance){
+            return instance[size];
+        }
+    }
+
+    let x = new Collection();
+    Collection.sizeOf(x); //0
+
+    x.add('foo')    
+    Collection.sizeOf(x) //1
+
+    Object.keys(x) // [0]
+    Object.getOwnPropertyNames(x) // ['0']
+    Object.getOenPropertySymbols(x) //Symbol(size)
+```
+只有Object.getOwnPropertySymbols()可以获取x的size属性，造成了一种私有的内部方法的效果
+
+
+
+
