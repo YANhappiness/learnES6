@@ -277,6 +277,3 @@ Reflect.ownKeys方法可以返回所有类型的键名，包括常规键名和Sy
 ```
 只有Object.getOwnPropertySymbols()可以获取x的size属性，造成了一种私有的内部方法的效果
 
-
-
-
