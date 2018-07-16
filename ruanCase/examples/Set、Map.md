@@ -55,3 +55,30 @@ set函数可以接受一个数组，作为参数，用来初始化
     set.add({});
     set.size // 2
 ```
+
+
+## set 实例的属性和方法
+
+set结构的实例有以下属性
+    - set.prototype.constructor: 构造函数，默认就是Set函数
+    - set.prototypr.size : 返回set实例的成员总数
+
+set实例的方法，分为两个大类，操作方法用于操作数据和遍历方法
+    - add（value） ： 添加某个值，返回set解构本身
+    - delete（value）：删除某个值，返回一个布尔值表示是否删除成功
+    - has（value） ： 返回一个布尔值，表示该值是否为set成员
+    - clear（）： 清除所有成员，没有返回值。
+
+```bash
+    let s = new Set(); 
+    s.add(1).add(2).add(2)
+    s.size // 2
+    s.has(1) // true
+    s.has(2) // true
+    s.has(3) // false
+    s.delete(2);
+    s.has(2) // false
+```
+
+下面是一个对比，
+
