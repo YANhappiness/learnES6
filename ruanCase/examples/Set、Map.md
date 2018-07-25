@@ -131,3 +131,71 @@ Array.from() 从一个类似数组或可迭代对象中创建一个新的数组�
 需要特别指出的是，Set的普遍顺序就是插入顺序，这个特性有事非常有用，比如用set保存一个回调函数列表，调用时就能保证按照添加顺序调用
 
 1 keys(),values(),entries()
+keys()方法、values方法、entries方法返回的都是遍历器对象。
+由于set结构没有键名，只有键值所有keys和values方法的行为完全一致
+```bash
+    let set = new Set(['red','green','blue']);
+
+    for(let item of set.keys()){
+        console.log(item);
+    }
+    //red 
+    //green
+    //blue
+
+    for(let item of set.values()){
+        console.log(item);
+    }
+    //red
+    //green
+    //blue
+
+    for(let item of set.entries()){
+        console.log(item);
+    }
+    // ['red','red']
+    // ['green','green']
+    // ['blue','blue']
+
+    set结构的实例默认可遍历，她的默认遍历生成函数就是她的values方法
+    Set.prototype[Symbol.iterator] === Set.prototype.values
+    //true
+
+    # 这意味着可直接省略values方法，直接调用for...of换选遍历set
+
+    let set = new Set(['red','green','blue'])
+
+    for(let x of set){
+        console.log(x);
+    }
+
+    //red
+    //green
+    //blue
+```
+
+### forEach()
+ Set结构的实例与数组一样，也拥有forEach方法，用于对每个成员执行某种操作，也没有返回值。
+
+ set = new Set([1,2,3])
+ set.forEach((value,key)=>console.log(key+":"+value))
+ // 1:1
+ // 4:4
+ // 9:9
+
+ 上面的代码说明，forEach方法的参数就是一个处理函数。改函数的参数与数组的forEach一致，一次为键值，键名，集合本身
+ forEach方法可以有第二个参数，表示处理函数内部的this对象
+
+ ### 遍历的应用
+```bash
+    let set = new Set(['red','green','blue'])
+    let arr = [...set]
+    // ['red','green','blue']
+
+    拓展运算符和Set结构结合，就可以取出数组的重复成员
+
+    let arr = [3,4,5,6,3,4,5]
+    let unique = [...new Set(arr)]
+    // [3,4,5,6]
+```
+
